@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class ApiExceptoin {
 
 	private HttpStatus status;
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDateTime timestamp = LocalDateTime.now();;
 	private String message;
 	private String debugMessage;
@@ -61,6 +61,7 @@ public class ApiExceptoin {
 
 	public void setDebugMessage(String debugMessage) {
 		this.debugMessage = debugMessage;
-	}	
+	}
+	
 
 }

@@ -2,62 +2,62 @@ package com.synechron.insurancecompany.services;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.synechron.insurancecompany.entity.Policy;
+import com.synechron.insurancecompany.exceptions.CustomException;
 import com.synechron.insurancecompany.repos.PolicyRepository;
+import com.synechron.insurancecompany.utils.PolicyValidator;
 
 @Service
 public class PolicyService {
 
 	@Autowired
 	private PolicyRepository repo;
+	
+	@Autowired
+	private PolicyValidator validator;
 
-	public List<Policy> getPolicy() {
-		return repo.findAll();
+	public List<Policy> getPolicy() throws CustomException {
+		if (repo.findAll().size() > 0) {
+			return repo.findAll();
+		} else {
+			throw new CustomException("No records found in database");
+		}
 	}
 	
-	public Policy getPolicyById(String policyId) throws Exception {
+	public Policy getPolicyById(String policyId) throws CustomException {
 		Optional<Policy> policy = repo.findById(policyId);
 		if(policy.isPresent()) {
 			return policy.get();
 		} else {
-			throw new Exception("Policy ID not found in database");
+			throw new CustomException("Policy ID not found in database");
 		}
 	}
 
-	public Policy addUpdatePolicy(Policy policy) throws Exception {
-				
+	public Policy addUpdatePolicy(Policy policy) throws CustomException {
 		if (policy.getId() != null) {
-			if(policy.getValidFrom().after(policy.getValidTo())) {
-				throw new Exception("Policy from date can not be greater than Policy to date");
-			} else if (policy.getDescription().length() > 250) {
-				throw new Exception("Description length cannot be more than 250 charecters");
-			}
-			repo.save(policy);
+			if(validator.isValidDates(policy)) {
+				repo.save(policy);
+			} else {
+				throw new CustomException("Policy validFrom date is greater than validTo date");
+			}			
 		} else {
-			throw new Exception("Policy ID is null");
+			throw new CustomException("Policy ID is null");
 		}
 		return policy;
 	}
 
-	public Policy deletePolicy(String policyId) throws Exception {
+	public Policy deletePolicy(String policyId) throws CustomException {
 		Optional<Policy> pc = repo.findById(policyId);
 		if (!pc.isPresent()) {
-			throw new Exception("Policy not present in database");
+			throw new CustomException("Policy not present in database");
 		} else {
 			repo.deleteById(policyId);
 			return pc.get();
 		}
-
 	}
 
 }

@@ -2,39 +2,41 @@ package com.synechron.insurancecompany.entity;
 
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.synechron.insurancecompany.utils.DateDeSerializer;
+
 import lombok.Data;
 
 @Data
-@Entity
-@AllArgsConstructor
 @Table(name="policy")
 public class Policy {
 	
 	@Id
 	@NotNull
+	@NotBlank(message = "Policy ID is mandatory")
 	private String id;
 	
-	@Length(max = 30)
+	@Length(max = 30, message = "Maximum length of name allowed is 30 characters")
+	@NotBlank(message = "Policy name is mandatory")
 	private String name;
 	
-	@Length(max = 250)
+	@Length(min = 10, max = 250, message = "Maximum length of description allowed is 250 characters")
 	private String description;
 	
+	@JsonDeserialize(using = DateDeSerializer.class)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date validFrom;
 	
+	@JsonDeserialize(using = DateDeSerializer.class)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private Date validTo;
 	
 	public String getId() {
@@ -72,7 +74,5 @@ public class Policy {
 		return "Policy [id=" + id + ", name=" + name + ", description=" + description + ", validFrom=" + validFrom
 				+ ", validTo=" + validTo + "]";
 	}
-	
-	
 
 }
